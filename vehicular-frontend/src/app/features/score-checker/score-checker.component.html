@@ -1,0 +1,40 @@
+<div class="score-checker card" style="margin-top: 50px; margin-bottom: 10%">
+  <div class="card-header">
+    <h2>Consulta de Puntaje de Vehículo</h2>
+  </div>
+
+  <form (ngSubmit)="onSubmit()" class="form-container">
+    <label for="plate" style="margin: 3%">Placa del Vehículo:</label>
+    <input
+      type="text"
+      placeholder="ABC123"
+      id="plate"
+      [(ngModel)]="plate"
+      name="plate"
+      required
+      (input)="clearMessage()"
+    />
+    <button
+      type="submit"
+      [ngClass]="isPlateValid(plate) ? 'btn-valid' : 'btn-invalid'"
+      [disabled]="!isPlateValid(plate)"
+    >
+      Consultar Puntaje
+    </button>
+  </form>
+
+  <!-- Spinner y mensaje de carga -->
+  <div *ngIf="isLoading" class="loading-container">
+    <p>Calculando...</p>
+    <div class="spinner"></div>
+  </div>
+
+  <div *ngIf="score !== null" class="score-result">
+    <h3>Puntaje Calculado:</h3>
+    <p>{{ score }}</p>
+  </div>
+
+  <div *ngIf="error && score == null" class="error-message">
+    <p style="color: red">{{ error }}</p>
+  </div>
+</div>
