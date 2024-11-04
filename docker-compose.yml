@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  vehicular-service:
+    image: vehicular-service:latest
+    build:
+      context: ./vehicular-service
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
+    depends_on:
+      rabbitmq:
+        condition: service_healthy  # Esperar que RabbitMQ esté listo
+
+  score-service:
+    image: score-service:latest
+    build:
+      context: ./score-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_RABBITMQ_PORT=5672
+      - SPRING_RABBITMQ_USERNAME=guest
+      - SPRING_RABBITMQ_PASSWORD=guest
+    depends_on:
+      rabbitmq:
+        condition: service_healthy  # Esperar que RabbitMQ esté listo
+
+  frontend:
+    image: vehicular-frontend:latest
+    build:
+      context: ./vehicular-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - vehicular-service
+      - score-service
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
